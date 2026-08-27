@@ -1194,7 +1194,7 @@ db.collection('entries').onSnapshot(snapshot => {
     }
     if (change.type === 'removed') {
       // Entry deleted from another device
-      const termOwner = change.doc.id;
+      const entry = change.doc.data();
       removeLocalCard(entry);
     }
   });
