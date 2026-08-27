@@ -5,9 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Adripedia - A shared knowledge repository of words and expressions">
   <title>Adripedia</title>
+  <!-- PWA & Web App Meta Tags -->
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#2563eb">
-  <link rel="apple-touch-icon" href="./icon-192.png">
+  <!-- iOS Web App Support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Adripedia">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     
@@ -1110,15 +1115,15 @@ initializeEntries();
 
 <script>
 // ⚠️ IMPORTANT: Replace with your actual Firebase config from console.firebase.google.com
- const firebaseConfig = {
-    apiKey: "AIzaSyCmQ8PmBoZjptknxmmtXAYKUIdJ2-Daf80",
-    authDomain: "adripedia-app.firebaseapp.com",
-    projectId: "adripedia-app",
-    storageBucket: "adripedia-app.firebasestorage.app",
-    messagingSenderId: "449571013192",
-    appId: "1:449571013192:web:cfcbd4ea9bcd6c5a4e4e7d",
-    measurementId: "G-Z8VJ8YR356"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyC mQ8PmBoZjptkn xmmtXAYKUIdJ2-Daf80",
+  authDomain: "adripedia-app.firebaseapp.com",
+  projectId: "adripedia-app",
+  storageBucket: "adripedia-app.appspot.com",
+  messagingSenderId: "449571013192",
+  appId: "1:449571013192:web:cfcbd4ea9bcd6c5a4e47d",
+  measurementId: "G-Z8VJ8YR356"
+};
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
