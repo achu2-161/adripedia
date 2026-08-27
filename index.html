@@ -171,6 +171,77 @@
       line-height: 1;
     }
     
+    .sort-wrap {
+      position: relative;
+    }
+    
+    .sort-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      z-index: 50;
+      min-width: 190px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.16);
+      padding: 6px 0;
+      overflow: hidden;
+    }
+    
+    .sort-menu.open {
+      display: block;
+    }
+    
+    .sort-group-label {
+      font-family: sans-serif;
+      font-size: 11px;
+      color: #9aa0a6;
+      padding: 6px 14px 4px;
+      letter-spacing: 0.2px;
+    }
+    
+    .sort-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 9px 14px;
+      border: none;
+      background: none;
+      font-family: sans-serif;
+      font-size: 13px;
+      color: #0f1419;
+      text-align: left;
+      cursor: pointer;
+    }
+    
+    .sort-option:active {
+      background: #f1f3f4;
+    }
+    
+    .sort-option.checked {
+      background: #e8eaed;
+    }
+    
+    .sort-tick {
+      width: 14px;
+      flex-shrink: 0;
+      color: #2563eb;
+      font-size: 12px;
+      visibility: hidden;
+    }
+    
+    .sort-option.checked .sort-tick {
+      visibility: visible;
+    }
+    
+    .sort-divider {
+      height: 1px;
+      background: #f0f0f0;
+      margin: 6px 0;
+    }
+    
     .tool-btn.active {
       border-color: #fbbf24;
       background: #fffbeb;
@@ -690,13 +761,32 @@
       <input type="text" class="search-input" id="search" placeholder="Search…" oninput="filterCards()">
     </div>
     <div class="header-controls" style="margin-top: 8px; gap: 6px;">
-      <button class="tool-btn" id="sortBtn" onclick="cycleSortOrder()" title="Change sort order">
-        <svg class="sort-icon" viewBox="0 0 12 16" aria-hidden="true">
-          <path class="sort-up" d="M6 2 L10 7 L2 7 Z"/>
-          <path class="sort-down" d="M6 14 L2 9 L10 9 Z"/>
-        </svg>
-        <span id="sortLabel">Newest</span>
-      </button>
+      <div class="sort-wrap">
+        <button class="tool-btn" id="sortBtn" onclick="toggleSortMenu(event)" title="Change sort order">
+          <svg class="sort-icon" viewBox="0 0 12 16" aria-hidden="true">
+            <path class="sort-up" d="M6 2 L10 7 L2 7 Z"/>
+            <path class="sort-down" d="M6 14 L2 9 L10 9 Z"/>
+          </svg>
+          <span id="sortLabel">Date added</span>
+        </button>
+        <div class="sort-menu" id="sortMenu" onclick="event.stopPropagation()">
+          <div class="sort-group-label">Sort by</div>
+          <button class="sort-option" data-field="alpha" onclick="setSortField('alpha')">
+            <span class="sort-tick">✓</span><span>Name</span>
+          </button>
+          <button class="sort-option" data-field="date" onclick="setSortField('date')">
+            <span class="sort-tick">✓</span><span>Date added</span>
+          </button>
+          <div class="sort-divider"></div>
+          <div class="sort-group-label">Sort direction</div>
+          <button class="sort-option" data-dir="desc" onclick="setSortDir('desc')">
+            <span class="sort-tick">✓</span><span id="dirDescLabel">New to old</span>
+          </button>
+          <button class="sort-option" data-dir="asc" onclick="setSortDir('asc')">
+            <span class="sort-tick">✓</span><span id="dirAscLabel">Old to new</span>
+          </button>
+        </div>
+      </div>
       <button class="tool-btn" id="favBtn" onclick="toggleFavoriteFilter()" title="Show favourites only">
         <span class="fav-icon">☆</span>
       </button>
@@ -784,7 +874,8 @@
 </div>
 
 <script>
-let sortOrder = 'date';
+let sortField = 'date';
+let sortDir = 'desc';
 let favoriteFilter = 'all';
 let currentCard = null;
 let entries = [];
@@ -805,8 +896,24 @@ function initializeEntries() {
   filterCards();
 }
 
-function cycleSortOrder() {
-  sortOrder = sortOrder === 'date' ? 'alpha' : 'date';
+function toggleSortMenu(e) {
+  if (e) e.stopPropagation();
+  const menu = document.getElementById('sortMenu');
+  menu.classList.toggle('open');
+}
+
+function closeSortMenu() {
+  document.getElementById('sortMenu').classList.remove('open');
+}
+
+function setSortField(field) {
+  sortField = field;
+  updateSortButton();
+  filterCards();
+}
+
+function setSortDir(dir) {
+  sortDir = dir;
   updateSortButton();
   filterCards();
 }
@@ -816,15 +923,30 @@ function updateSortButton() {
   const up = document.querySelector('.sort-up');
   const down = document.querySelector('.sort-down');
   
-  if (sortOrder === 'alpha') {
-    label.textContent = 'A–Z';
+  label.textContent = sortField === 'alpha' ? 'Name' : 'Date added';
+  
+  // Ascending = A→Z or old→new, shown as the up triangle
+  if (sortDir === 'asc') {
     up.classList.add('active');
     down.classList.remove('active');
   } else {
-    label.textContent = 'Newest';
     down.classList.add('active');
     up.classList.remove('active');
   }
+  
+  // Direction labels depend on which field is being sorted
+  document.getElementById('dirDescLabel').textContent =
+    sortField === 'alpha' ? 'Z to A' : 'New to old';
+  document.getElementById('dirAscLabel').textContent =
+    sortField === 'alpha' ? 'A to Z' : 'Old to new';
+  
+  // Move the ticks
+  document.querySelectorAll('#sortMenu .sort-option').forEach(opt => {
+    const isActive =
+      (opt.dataset.field && opt.dataset.field === sortField) ||
+      (opt.dataset.dir && opt.dataset.dir === sortDir);
+    opt.classList.toggle('checked', isActive);
+  });
 }
 
 function toggleFavoriteFilter() {
@@ -869,11 +991,12 @@ function filterCards() {
     return matches;
   });
 
-  if (sortOrder === 'alpha') {
+  if (sortField === 'alpha') {
     filtered.sort((a, b) => a.dataset.term.localeCompare(b.dataset.term));
   } else {
-    filtered.sort((a, b) => new Date(b.dataset.date) - new Date(a.dataset.date));
+    filtered.sort((a, b) => new Date(a.dataset.date) - new Date(b.dataset.date));
   }
+  if (sortDir === 'desc') filtered.reverse();
 
   const list = document.getElementById('cardsList');
   
@@ -1437,6 +1560,9 @@ window.handleSave = function(e) {
 };
 
 // Load from Firestore on app start
+// Close the sort popover when tapping anywhere else
+document.addEventListener('click', closeSortMenu);
+
 updateSortButton();
 loadEntriesFromFirestore();
 </script>
