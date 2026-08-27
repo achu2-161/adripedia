@@ -27,7 +27,7 @@
     body {
       display: flex;
       justify-content: center;
-      padding: 8px;
+      padding: 0;
     }
     
     .app {
@@ -37,19 +37,14 @@
       display: flex;
       flex-direction: column;
       height: 100vh;
-      border-radius: 12px;
+      height: 100dvh;
       overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     }
     
     .app-header {
       background: #e8eaed;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-      padding: 16px 16px;
+      padding: 16px 12px 14px;
       flex-shrink: 0;
-      margin: 8px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     }
     
     .header-top {
@@ -323,18 +318,49 @@
     }
     
     .flashcard {
+      perspective: 1200px;
+      height: 280px;
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    .flash-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+    
+    .flash-inner.flipped {
+      transform: rotateY(180deg);
+    }
+    
+    /* Used when moving to the next card, so it doesn't visibly
+       flip itself back before the new content appears */
+    .flash-inner.no-anim {
+      transition: none;
+    }
+    
+    .flash-face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
       background: #fff;
       border-radius: 16px;
       box-shadow: 0 2px 14px rgba(0, 0, 0, 0.08);
-      padding: 32px 24px;
-      min-height: 240px;
+      padding: 28px 24px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      cursor: pointer;
-      user-select: none;
+      overflow-y: auto;
+    }
+    
+    .flash-back {
+      transform: rotateY(180deg);
     }
     
     .flash-side-label {
@@ -344,6 +370,7 @@
       letter-spacing: 0.4px;
       text-transform: uppercase;
       margin-bottom: 16px;
+      flex-shrink: 0;
     }
     
     .flash-text {
@@ -365,6 +392,7 @@
       color: #c4c7cb;
       margin-top: 22px;
       letter-spacing: 0.3px;
+      flex-shrink: 0;
     }
     
     .quiz-side-label {
@@ -807,6 +835,31 @@
       background: #f8f9fa;
     }
     
+    .owner-choices {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .owner-choice {
+      flex: 1;
+      padding: 11px 12px;
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      background: #fff;
+      font-family: sans-serif;
+      font-size: 13px;
+      color: #5f6368;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    
+    .owner-choice.selected {
+      border-color: #2563eb;
+      background: #eff4ff;
+      color: #1d4ed8;
+      font-weight: 500;
+    }
+    
     .modal {
       display: none;
       position: fixed;
@@ -1159,6 +1212,14 @@
     </div>
 
     <form onsubmit="handleSave(event)">
+      <div class="form-group" id="ownerGroup" style="display: none;">
+        <label>Encyclopedia</label>
+        <div class="owner-choices">
+          <button type="button" class="owner-choice" data-owner="adrian" onclick="setFormOwner('adrian')">Adripedia</button>
+          <button type="button" class="owner-choice" data-owner="yixiao" onclick="setFormOwner('yixiao')">Yixiaopedia</button>
+        </div>
+      </div>
+
       <div class="form-group">
         <label>Word or expression</label>
         <input type="text" id="term" placeholder="e.g., Tsundoku" required>
@@ -1245,9 +1306,18 @@
     <!-- Flashcards -->
     <div class="study-panel" id="studyFlash">
       <div class="flashcard" id="flashcard" onclick="flipCard()">
-        <div class="flash-side-label" id="flashLabel">Word</div>
-        <div class="flash-text" id="flashText"></div>
-        <div class="flash-hint" id="flashHint">Tap to reveal</div>
+        <div class="flash-inner" id="flashInner">
+          <div class="flash-face flash-front">
+            <div class="flash-side-label" id="frontLabel">Word</div>
+            <div class="flash-text" id="frontText"></div>
+            <div class="flash-hint">Tap to reveal</div>
+          </div>
+          <div class="flash-face flash-back">
+            <div class="flash-side-label" id="backLabel">Definition</div>
+            <div class="flash-text" id="backText"></div>
+            <div class="flash-hint">Tap to flip back</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1470,8 +1540,30 @@ function updateTitle() {
   }
 }
 
+// Which encyclopedia a new entry will be filed under. Normally implied by the
+// view you're in, but the All view has no implied owner, so it must be asked.
+let formOwner = 'adrian';
+
+function setFormOwner(owner) {
+  formOwner = owner;
+  document.querySelectorAll('#ownerGroup .owner-choice').forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.owner === owner);
+  });
+}
+
+function prepareOwnerField(existingOwner) {
+  const group = document.getElementById('ownerGroup');
+  const needsChoice = currentEncyclopedia === 'all';
+
+  group.style.display = needsChoice ? '' : 'none';
+  // Editing keeps the entry where it already lives; a new entry in the All
+  // view defaults to Adripedia until told otherwise.
+  setFormOwner(existingOwner || (needsChoice ? 'adrian' : currentEncyclopedia));
+}
+
 function openForm() {
   document.body.classList.add('modal-open');
+  prepareOwnerField(null);
   document.getElementById('createModal').classList.add('active');
   document.getElementById('term').focus();
 }
@@ -1603,6 +1695,7 @@ function editEntry() {
   
   closeDetail();
   document.body.classList.add('modal-open');
+  prepareOwnerField(currentCard.dataset.owner);
   document.getElementById('createModal').classList.add('active');
   document.getElementById('term').focus();
   
@@ -1615,7 +1708,7 @@ function handleSave(e) {
   const term = document.getElementById('term').value.trim();
   const def = document.getElementById('def').value.trim();
   const link = document.getElementById('link').value.trim();
-  const owner = currentEncyclopedia; // Auto-assign to current encyclopedia
+  const owner = formOwner; // set by prepareOwnerField when the form opened
   const imageInput = document.getElementById('image');
   const isEditing = document.getElementById('term').dataset.editing === 'true';
   const originalTerm = document.getElementById('term').dataset.originalTerm;
@@ -1796,11 +1889,16 @@ let studyFavsOnly = false;
 let studyMode = null;          // 'flash' | 'quiz'
 let studyItems = [];           // the shuffled session deck
 let studyIndex = 0;
-let studyScore = 0;
 let cardFlipped = false;
-let answerLocked = false;
 
 const MIN_QUIZ_ENTRIES = 4;
+const QUIZ_LENGTH = 10;        // questions per quiz session
+
+// Score is derived from the recorded answers rather than tallied as you go,
+// so revisiting a question with Back can never double-count it.
+function currentScore() {
+  return studyItems.filter(i => i.answered != null && i.options[i.answered].correct).length;
+}
 
 function shuffle(arr) {
   const a = arr.slice();
@@ -1883,7 +1981,8 @@ function refreshStudySetup() {
     const needed = MIN_QUIZ_ENTRIES - count;
     note.textContent = `${count} ${count === 1 ? 'entry' : 'entries'} · add ${needed} more to unlock the quiz.`;
   } else {
-    note.textContent = `${count} entries in this deck.`;
+    const qs = Math.min(count, QUIZ_LENGTH);
+    note.textContent = `${count} entries · flashcards run the whole deck, quiz picks ${qs} at random.`;
   }
 }
 
@@ -1894,7 +1993,6 @@ function startStudy(mode) {
 
   studyMode = mode;
   studyIndex = 0;
-  studyScore = 0;
 
   // Direction is randomised per item, so a session mixes
   // "what does this word mean" with "what's the word for this"
@@ -1904,7 +2002,12 @@ function startStudy(mode) {
   }));
 
   if (mode === 'quiz') {
-    studyItems.forEach(item => { item.options = buildOptions(item, deck); });
+    // A quiz is a short random sample, not the whole library
+    studyItems = studyItems.slice(0, QUIZ_LENGTH);
+    studyItems.forEach(item => {
+      item.options = buildOptions(item, deck);
+      item.answered = null;   // index of the option picked, once picked
+    });
   }
 
   showStudyPanel(mode === 'flash' ? 'studyFlash' : 'studyQuiz');
@@ -1932,7 +2035,7 @@ function renderItem() {
 
   document.getElementById('studyProgress').textContent =
     studyMode === 'quiz'
-      ? `${studyIndex + 1} / ${total}  ·  ${studyScore} correct`
+      ? `${studyIndex + 1} / ${total}  \u00b7  ${currentScore()} correct`
       : `${studyIndex + 1} / ${total}`;
 
   document.getElementById('studyPrev').disabled = studyIndex === 0;
@@ -1940,28 +2043,40 @@ function renderItem() {
     studyIndex === total - 1 ? 'Finish' : 'Next';
 
   if (studyMode === 'flash') {
-    cardFlipped = false;
-    renderFlashSide(item);
+    renderFlashcard(item);
   } else {
-    answerLocked = false;
     renderQuestion(item);
   }
 }
 
-function renderFlashSide(item) {
-  const showingTerm = cardFlipped ? !item.showTermFirst : item.showTermFirst;
-  const text = document.getElementById('flashText');
+function renderFlashcard(item) {
+  const inner = document.getElementById('flashInner');
+  const front = document.getElementById('frontText');
+  const back  = document.getElementById('backText');
 
-  document.getElementById('flashLabel').textContent = showingTerm ? 'Word' : 'Definition';
-  text.textContent = showingTerm ? item.term : item.def;
-  text.classList.toggle('is-term', showingTerm);
-  document.getElementById('flashHint').textContent =
-    cardFlipped ? 'Tap to flip back' : 'Tap to reveal';
+  // Snap back to the front without animating, so a new card never
+  // appears to un-flip itself on screen
+  cardFlipped = false;
+  inner.classList.add('no-anim');
+  inner.classList.remove('flipped');
+
+  front.textContent = item.showTermFirst ? item.term : item.def;
+  back.textContent  = item.showTermFirst ? item.def  : item.term;
+  front.classList.toggle('is-term', item.showTermFirst);
+  back.classList.toggle('is-term', !item.showTermFirst);
+
+  document.getElementById('frontLabel').textContent = item.showTermFirst ? 'Word' : 'Definition';
+  document.getElementById('backLabel').textContent  = item.showTermFirst ? 'Definition' : 'Word';
+
+  // Restore the transition once the reset has painted
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => inner.classList.remove('no-anim'));
+  });
 }
 
 function flipCard() {
   cardFlipped = !cardFlipped;
-  renderFlashSide(studyItems[studyIndex]);
+  document.getElementById('flashInner').classList.toggle('flipped', cardFlipped);
 }
 
 function renderQuestion(item) {
@@ -1981,26 +2096,28 @@ function renderQuestion(item) {
     btn.onclick = () => answerQuestion(i);
     box.appendChild(btn);
   });
+
+  // Already answered earlier in this session - show it as it was left
+  if (item.answered != null) paintAnswer(item);
+}
+
+function paintAnswer(item) {
+  document.querySelectorAll('#quizOptions .quiz-option').forEach((btn, i) => {
+    btn.classList.add('locked');
+    if (item.options[i].correct) btn.classList.add('correct');
+    else if (i === item.answered) btn.classList.add('wrong');
+  });
 }
 
 function answerQuestion(chosen) {
-  if (answerLocked) return;
-  answerLocked = true;
-
   const item = studyItems[studyIndex];
-  const buttons = document.querySelectorAll('#quizOptions .quiz-option');
+  if (item.answered != null) return;   // one answer per question, ever
 
-  if (item.options[chosen].correct) studyScore++;
-
-  // Always reveal the right answer, not just mark the wrong one
-  buttons.forEach((btn, i) => {
-    btn.classList.add('locked');
-    if (item.options[i].correct) btn.classList.add('correct');
-    else if (i === chosen) btn.classList.add('wrong');
-  });
+  item.answered = chosen;
+  paintAnswer(item);
 
   document.getElementById('studyProgress').textContent =
-    `${studyIndex + 1} / ${studyItems.length}  ·  ${studyScore} correct`;
+    `${studyIndex + 1} / ${studyItems.length}  \u00b7  ${currentScore()} correct`;
 }
 
 function nextItem() {
@@ -2025,8 +2142,9 @@ function finishStudy() {
     studyMode === 'quiz' ? 'Quiz complete' : 'Deck complete';
 
   if (studyMode === 'quiz') {
-    const pct = Math.round((studyScore / total) * 100);
-    document.getElementById('resultScore').textContent = `${studyScore} / ${total}`;
+    const score = currentScore();
+    const pct = Math.round((score / total) * 100);
+    document.getElementById('resultScore').textContent = `${score} / ${total}`;
     document.getElementById('resultNote').textContent = `${pct}% correct.`;
   } else {
     document.getElementById('resultScore').textContent = total;
