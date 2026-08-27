@@ -1001,12 +1001,25 @@ function filterCards() {
     return matches;
   });
 
-  if (sortField === 'alpha') {
-    filtered.sort((a, b) => a.dataset.term.localeCompare(b.dataset.term));
-  } else {
-    filtered.sort((a, b) => new Date(a.dataset.date) - new Date(b.dataset.date));
-  }
-  if (sortDir === 'desc') filtered.reverse();
+  // Direction is applied inside the comparator, not by reversing afterwards —
+  // reversing a tied list depends on the current DOM order, so repeated
+  // renders would flip back and forth.
+  // Sorting uses createdAt (full timestamp, never displayed) so entries added
+  // on the same day still order by the minute they were created.
+  const dir = sortDir === 'desc' ? -1 : 1;
+  const stamp = c => new Date(c.dataset.createdAt || (c.dataset.date + 'T00:00:00.000Z')).getTime();
+  filtered.sort((a, b) => {
+    let cmp;
+    if (sortField === 'alpha') {
+      cmp = a.dataset.term.localeCompare(b.dataset.term);
+    } else {
+      cmp = stamp(a) - stamp(b);
+      // Identical timestamps (e.g. older entries with no createdAt): fall
+      // back to term so the order is stable across re-renders
+      if (cmp === 0) cmp = a.dataset.term.localeCompare(b.dataset.term);
+    }
+    return cmp * dir;
+  });
 
   const list = document.getElementById('cardsList');
   
@@ -1249,6 +1262,7 @@ function handleSave(e) {
     card.className = 'card';
     card.dataset.owner = owner;
     card.dataset.date = new Date().toISOString().split('T')[0];
+    card.dataset.createdAt = new Date().toISOString();
     card.dataset.term = term;
     if (link) card.dataset.link = link;
     
@@ -1287,6 +1301,7 @@ function backupData() {
     def: card.querySelector('.card-def').textContent,
     owner: card.dataset.owner,
     date: card.dataset.date,
+    createdAt: card.dataset.createdAt || '',
     link: card.dataset.link || '',
     image: card.dataset.image || '',
     favorite: card.dataset.favorite === 'true'
@@ -1333,6 +1348,7 @@ function restoreData() {
             card.dataset.term = entry.term;
             card.dataset.owner = entry.owner;
             card.dataset.date = entry.date || new Date().toISOString().split('T')[0];
+            card.dataset.createdAt = entry.createdAt || ((entry.date || new Date().toISOString().split('T')[0]) + 'T00:00:00.000Z');
             card.dataset.favorite = entry.favorite ? 'true' : 'false';
             if (entry.link) card.dataset.link = entry.link;
             if (entry.image) card.dataset.image = entry.image;
@@ -1450,6 +1466,10 @@ async function saveToFirestore(card) {
       def: card.querySelector('.card-def').textContent,
       owner: card.dataset.owner,
       date: card.dataset.date,
+      // Creation time, kept for sorting only — never shown in the UI.
+      // Set once; edits must not reset it, so fall back to the display
+      // date at midnight for entries that predate this field.
+      createdAt: card.dataset.createdAt || (card.dataset.date + 'T00:00:00.000Z'),
       link: card.dataset.link || '',
       image: card.dataset.image || '',
       favorite: card.dataset.favorite === 'true',
@@ -1502,6 +1522,7 @@ function updateLocalCard(entry) {
     card.dataset.owner = entry.owner;
     card.dataset.term = entry.term;
     card.dataset.date = entry.date;
+    card.dataset.createdAt = entry.createdAt || entry.updatedAt || (entry.date + 'T00:00:00.000Z');
     if (entry.link) card.dataset.link = entry.link;
     if (entry.image) card.dataset.image = entry.image;
     
@@ -1523,6 +1544,7 @@ function updateLocalCard(entry) {
   } else {
     // Update existing card
     card.dataset.date = entry.date;
+    if (entry.createdAt) card.dataset.createdAt = entry.createdAt;
     if (entry.link) card.dataset.link = entry.link;
     if (entry.image) card.dataset.image = entry.image;
     
