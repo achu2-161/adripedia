@@ -171,6 +171,332 @@
       line-height: 1;
     }
     
+    .study-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: #e8eaed;
+      flex-direction: column;
+    }
+    
+    .study-overlay.active {
+      display: flex;
+    }
+    
+    .study-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      flex-shrink: 0;
+    }
+    
+    .study-progress {
+      font-family: sans-serif;
+      font-size: 13px;
+      color: #5f6368;
+      letter-spacing: 0.3px;
+    }
+    
+    .study-close {
+      background: none;
+      border: none;
+      font-size: 26px;
+      line-height: 1;
+      color: #5f6368;
+      cursor: pointer;
+      padding: 0 4px;
+    }
+    
+    .study-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    
+    .study-panel {
+      display: none;
+    }
+    
+    .study-panel.active {
+      display: block;
+    }
+    
+    .study-heading {
+      font-family: sans-serif;
+      font-size: 22px;
+      font-weight: 600;
+      color: #0f1419;
+      margin-bottom: 22px;
+      letter-spacing: -0.3px;
+    }
+    
+    .study-group-label {
+      font-family: sans-serif;
+      font-size: 11px;
+      color: #9aa0a6;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    
+    .study-choices {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .study-choice {
+      flex: 1;
+      min-width: 110px;
+      padding: 12px 14px;
+      border: 1px solid #dadce0;
+      border-radius: 10px;
+      background: #fff;
+      font-family: sans-serif;
+      font-size: 13px;
+      color: #0f1419;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    
+    .study-choice:active {
+      background: #f1f3f4;
+    }
+    
+    .study-choice.selected {
+      border-color: #2563eb;
+      background: #eff4ff;
+      color: #1d4ed8;
+      font-weight: 500;
+    }
+    
+    .study-choice:disabled {
+      opacity: 0.45;
+      cursor: default;
+    }
+    
+    .study-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      margin-top: 8px;
+      padding: 11px 14px;
+      border: 1px solid #dadce0;
+      border-radius: 10px;
+      background: #fff;
+      font-family: sans-serif;
+      font-size: 13px;
+      color: #0f1419;
+      text-align: left;
+      cursor: pointer;
+    }
+    
+    .study-toggle.checked {
+      border-color: #fbbf24;
+      background: #fffbeb;
+    }
+    
+    .study-tick {
+      width: 14px;
+      flex-shrink: 0;
+      color: #f59e0b;
+      font-size: 12px;
+      visibility: hidden;
+    }
+    
+    .study-toggle.checked .study-tick {
+      visibility: visible;
+    }
+    
+    .study-note {
+      font-family: sans-serif;
+      font-size: 12px;
+      color: #9aa0a6;
+      margin-top: 18px;
+      line-height: 1.5;
+    }
+    
+    .flashcard {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 14px rgba(0, 0, 0, 0.08);
+      padding: 32px 24px;
+      min-height: 240px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    
+    .flash-side-label {
+      font-family: sans-serif;
+      font-size: 11px;
+      color: #9aa0a6;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    
+    .flash-text {
+      font-size: 20px;
+      color: #0f1419;
+      line-height: 1.45;
+    }
+    
+    .flash-text.is-term {
+      font-family: sans-serif;
+      font-weight: 600;
+      font-size: 26px;
+      letter-spacing: -0.3px;
+    }
+    
+    .flash-hint {
+      font-family: sans-serif;
+      font-size: 11px;
+      color: #c4c7cb;
+      margin-top: 22px;
+      letter-spacing: 0.3px;
+    }
+    
+    .quiz-side-label {
+      font-family: sans-serif;
+      font-size: 11px;
+      color: #9aa0a6;
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    
+    .quiz-prompt {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+      padding: 22px 18px;
+      font-size: 18px;
+      color: #0f1419;
+      line-height: 1.45;
+      margin-bottom: 18px;
+    }
+    
+    .quiz-prompt.is-term {
+      font-family: sans-serif;
+      font-weight: 600;
+      font-size: 24px;
+      letter-spacing: -0.3px;
+    }
+    
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .quiz-option {
+      padding: 14px 16px;
+      border: 1px solid #dadce0;
+      border-radius: 10px;
+      background: #fff;
+      font-size: 14px;
+      color: #0f1419;
+      text-align: left;
+      line-height: 1.4;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    
+    .quiz-option:active {
+      background: #f1f3f4;
+    }
+    
+    .quiz-option.correct {
+      border-color: #16a34a;
+      background: #f0fdf4;
+      color: #15803d;
+    }
+    
+    .quiz-option.wrong {
+      border-color: #dc2626;
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+    
+    .quiz-option.locked {
+      cursor: default;
+    }
+    
+    .result-score {
+      font-family: sans-serif;
+      font-size: 40px;
+      font-weight: 600;
+      color: #2563eb;
+      letter-spacing: -1px;
+    }
+    
+    .study-nav {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px 20px;
+      flex-shrink: 0;
+    }
+    
+    .study-nav-btn {
+      flex: 1;
+      padding: 14px;
+      border: 1px solid #dadce0;
+      border-radius: 10px;
+      background: #fff;
+      font-family: sans-serif;
+      font-size: 14px;
+      color: #0f1419;
+      cursor: pointer;
+    }
+    
+    .study-nav-btn.primary {
+      background: #2563eb;
+      border-color: #2563eb;
+      color: #fff;
+      font-weight: 500;
+    }
+    
+    .study-nav-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+    
+    .detail-star {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 24px;
+      line-height: 1;
+      color: #9aa0a6;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.2s, color 0.2s;
+    }
+    
+    .detail-star:hover {
+      opacity: 1;
+    }
+    
+    .detail-star.favorite {
+      opacity: 1;
+      color: #fbbf24;
+    }
+    
+    .detail-star:focus {
+      outline: none;
+    }
+    
     .sort-wrap {
       position: relative;
     }
@@ -817,6 +1143,8 @@
     <button class="menu-item" onclick="switchEncyclopedia('all')">🌍 All entries</button>
     <button class="menu-item" onclick="switchEncyclopedia('adrian')">📖 Adripedia</button>
     <button class="menu-item" onclick="switchEncyclopedia('yixiao')">📖 Yixiaopedia</button>
+    <div style="border-top: 1px solid #f0f0f0;"></div>
+    <button class="menu-item" onclick="openStudy()">🎴 Study mode</button>
     <div style="flex: 1;"></div>
     <button class="menu-item" onclick="backupData()" style="border-bottom: 1px solid #f0f0f0;">⬇ Backup entries</button>
     <button class="menu-item" onclick="restoreData()">⬆ Restore entries</button>
@@ -865,7 +1193,7 @@
 <div class="modal" id="detailModal">
   <div class="modal-content">
     <div class="modal-header">
-      <div></div>
+      <button class="detail-star" id="detailStar" onclick="toggleFavoriteFromDetail()" title="Favourite">☆</button>
       <button class="modal-close" onclick="closeDetail()">×</button>
     </div>
 
@@ -879,6 +1207,73 @@
       <button class="btn" onclick="editEntry()">Edit</button>
       <button class="btn btn-danger" onclick="deleteEntry()">Delete</button>
     </div>
+  </div>
+</div>
+
+<div class="study-overlay" id="studyOverlay">
+  <div class="study-bar">
+    <span class="study-progress" id="studyProgress"></span>
+    <button class="study-close" onclick="exitStudy()">×</button>
+  </div>
+
+  <div class="study-body">
+
+    <!-- Setup -->
+    <div class="study-panel" id="studySetup">
+      <div class="study-heading">Study</div>
+
+      <div class="study-group-label">Deck</div>
+      <div class="study-choices" id="deckChoices">
+        <button class="study-choice" data-deck="all" onclick="setStudyDeck('all')">All entries</button>
+        <button class="study-choice" data-deck="adrian" onclick="setStudyDeck('adrian')">Adripedia</button>
+        <button class="study-choice" data-deck="yixiao" onclick="setStudyDeck('yixiao')">Yixiaopedia</button>
+      </div>
+
+      <button class="study-toggle" id="studyFavToggle" onclick="toggleStudyFavs()">
+        <span class="study-tick">✓</span><span>Favourites only</span>
+      </button>
+
+      <div class="study-group-label" style="margin-top: 20px;">Mode</div>
+      <div class="study-choices">
+        <button class="study-choice" id="modeFlash" onclick="startStudy('flash')">🎴 Flashcards</button>
+        <button class="study-choice" id="modeQuiz" onclick="startStudy('quiz')">❓ Quiz</button>
+      </div>
+
+      <div class="study-note" id="studyCount"></div>
+    </div>
+
+    <!-- Flashcards -->
+    <div class="study-panel" id="studyFlash">
+      <div class="flashcard" id="flashcard" onclick="flipCard()">
+        <div class="flash-side-label" id="flashLabel">Word</div>
+        <div class="flash-text" id="flashText"></div>
+        <div class="flash-hint" id="flashHint">Tap to reveal</div>
+      </div>
+    </div>
+
+    <!-- Quiz -->
+    <div class="study-panel" id="studyQuiz">
+      <div class="quiz-side-label" id="quizLabel"></div>
+      <div class="quiz-prompt" id="quizPrompt"></div>
+      <div class="quiz-options" id="quizOptions"></div>
+    </div>
+
+    <!-- Results -->
+    <div class="study-panel" id="studyResults">
+      <div class="study-heading" id="resultTitle">Done</div>
+      <div class="result-score" id="resultScore"></div>
+      <div class="study-note" id="resultNote"></div>
+      <div class="study-choices" style="margin-top: 24px;">
+        <button class="study-choice" onclick="restartStudy()">Study again</button>
+        <button class="study-choice" onclick="backToStudySetup()">Change deck</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="study-nav" id="studyNav">
+    <button class="study-nav-btn" id="studyPrev" onclick="prevItem()">Back</button>
+    <button class="study-nav-btn primary" id="studyNext" onclick="nextItem()">Next</button>
   </div>
 </div>
 
@@ -1119,6 +1514,11 @@ function showDetail(card) {
   document.getElementById('detailTerm').textContent = term;
   document.getElementById('detailOwner').style.display = 'none';
   document.getElementById('detailDef').textContent = def;
+  
+  const isFavorite = card.dataset.favorite === 'true';
+  const detailStar = document.getElementById('detailStar');
+  detailStar.textContent = isFavorite ? '★' : '☆';
+  detailStar.classList.toggle('favorite', isFavorite);
   
   const linkEl = document.getElementById('detailLink');
   if (link) {
@@ -1389,6 +1789,254 @@ function restoreData() {
   document.body.removeChild(input);
 }
 
+/* ---------------- Study mode ---------------- */
+
+let studyDeckSource = 'all';   // 'all' | 'adrian' | 'yixiao'
+let studyFavsOnly = false;
+let studyMode = null;          // 'flash' | 'quiz'
+let studyItems = [];           // the shuffled session deck
+let studyIndex = 0;
+let studyScore = 0;
+let cardFlipped = false;
+let answerLocked = false;
+
+const MIN_QUIZ_ENTRIES = 4;
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// Read the library straight from the DOM, so study always reflects
+// whatever has synced in, without a separate copy to keep in step.
+function collectDeck() {
+  return Array.from(document.querySelectorAll('.card'))
+    .filter(card => {
+      if (studyDeckSource !== 'all' && card.dataset.owner !== studyDeckSource) return false;
+      if (studyFavsOnly && card.dataset.favorite !== 'true') return false;
+      return true;
+    })
+    .map(card => ({
+      term: card.dataset.term,
+      def: card.querySelector('.card-def').textContent
+    }));
+}
+
+function openStudy() {
+  closeMenu();
+  document.body.classList.add('modal-open');
+  document.getElementById('studyOverlay').classList.add('active');
+  backToStudySetup();
+}
+
+function exitStudy() {
+  document.body.classList.remove('modal-open');
+  document.getElementById('studyOverlay').classList.remove('active');
+}
+
+function showStudyPanel(id) {
+  ['studySetup', 'studyFlash', 'studyQuiz', 'studyResults'].forEach(p => {
+    document.getElementById(p).classList.toggle('active', p === id);
+  });
+  document.getElementById('studyNav').style.display =
+    (id === 'studyFlash' || id === 'studyQuiz') ? 'flex' : 'none';
+}
+
+function backToStudySetup() {
+  studyMode = null;
+  document.getElementById('studyProgress').textContent = '';
+  showStudyPanel('studySetup');
+  refreshStudySetup();
+}
+
+function setStudyDeck(source) {
+  studyDeckSource = source;
+  refreshStudySetup();
+}
+
+function toggleStudyFavs() {
+  studyFavsOnly = !studyFavsOnly;
+  refreshStudySetup();
+}
+
+function refreshStudySetup() {
+  document.querySelectorAll('#deckChoices .study-choice').forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.deck === studyDeckSource);
+  });
+  document.getElementById('studyFavToggle').classList.toggle('checked', studyFavsOnly);
+
+  const count = collectDeck().length;
+  const quizBtn = document.getElementById('modeQuiz');
+  const flashBtn = document.getElementById('modeFlash');
+  const note = document.getElementById('studyCount');
+
+  flashBtn.disabled = count === 0;
+  quizBtn.disabled = count < MIN_QUIZ_ENTRIES;
+
+  if (count === 0) {
+    note.textContent = 'No entries in this deck yet.';
+  } else if (count < MIN_QUIZ_ENTRIES) {
+    const needed = MIN_QUIZ_ENTRIES - count;
+    note.textContent = `${count} ${count === 1 ? 'entry' : 'entries'} · add ${needed} more to unlock the quiz.`;
+  } else {
+    note.textContent = `${count} entries in this deck.`;
+  }
+}
+
+function startStudy(mode) {
+  const deck = collectDeck();
+  if (!deck.length) return;
+  if (mode === 'quiz' && deck.length < MIN_QUIZ_ENTRIES) return;
+
+  studyMode = mode;
+  studyIndex = 0;
+  studyScore = 0;
+
+  // Direction is randomised per item, so a session mixes
+  // "what does this word mean" with "what's the word for this"
+  studyItems = shuffle(deck).map(item => ({
+    ...item,
+    showTermFirst: Math.random() < 0.5
+  }));
+
+  if (mode === 'quiz') {
+    studyItems.forEach(item => { item.options = buildOptions(item, deck); });
+  }
+
+  showStudyPanel(mode === 'flash' ? 'studyFlash' : 'studyQuiz');
+  renderItem();
+}
+
+function restartStudy() {
+  startStudy(studyMode || 'flash');
+}
+
+// Three wrong answers drawn from the rest of the deck, plus the real one
+function buildOptions(item, deck) {
+  const others = deck.filter(d => d.term !== item.term);
+  const distractors = shuffle(others).slice(0, 3);
+  const answerKey = item.showTermFirst ? 'def' : 'term';
+  return shuffle([
+    { text: item[answerKey], correct: true },
+    ...distractors.map(d => ({ text: d[answerKey], correct: false }))
+  ]);
+}
+
+function renderItem() {
+  const item = studyItems[studyIndex];
+  const total = studyItems.length;
+
+  document.getElementById('studyProgress').textContent =
+    studyMode === 'quiz'
+      ? `${studyIndex + 1} / ${total}  ·  ${studyScore} correct`
+      : `${studyIndex + 1} / ${total}`;
+
+  document.getElementById('studyPrev').disabled = studyIndex === 0;
+  document.getElementById('studyNext').textContent =
+    studyIndex === total - 1 ? 'Finish' : 'Next';
+
+  if (studyMode === 'flash') {
+    cardFlipped = false;
+    renderFlashSide(item);
+  } else {
+    answerLocked = false;
+    renderQuestion(item);
+  }
+}
+
+function renderFlashSide(item) {
+  const showingTerm = cardFlipped ? !item.showTermFirst : item.showTermFirst;
+  const text = document.getElementById('flashText');
+
+  document.getElementById('flashLabel').textContent = showingTerm ? 'Word' : 'Definition';
+  text.textContent = showingTerm ? item.term : item.def;
+  text.classList.toggle('is-term', showingTerm);
+  document.getElementById('flashHint').textContent =
+    cardFlipped ? 'Tap to flip back' : 'Tap to reveal';
+}
+
+function flipCard() {
+  cardFlipped = !cardFlipped;
+  renderFlashSide(studyItems[studyIndex]);
+}
+
+function renderQuestion(item) {
+  const prompt = document.getElementById('quizPrompt');
+
+  document.getElementById('quizLabel').textContent =
+    item.showTermFirst ? 'Which definition matches?' : 'Which word means this?';
+  prompt.textContent = item.showTermFirst ? item.term : item.def;
+  prompt.classList.toggle('is-term', item.showTermFirst);
+
+  const box = document.getElementById('quizOptions');
+  box.innerHTML = '';
+  item.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+    btn.textContent = opt.text;
+    btn.onclick = () => answerQuestion(i);
+    box.appendChild(btn);
+  });
+}
+
+function answerQuestion(chosen) {
+  if (answerLocked) return;
+  answerLocked = true;
+
+  const item = studyItems[studyIndex];
+  const buttons = document.querySelectorAll('#quizOptions .quiz-option');
+
+  if (item.options[chosen].correct) studyScore++;
+
+  // Always reveal the right answer, not just mark the wrong one
+  buttons.forEach((btn, i) => {
+    btn.classList.add('locked');
+    if (item.options[i].correct) btn.classList.add('correct');
+    else if (i === chosen) btn.classList.add('wrong');
+  });
+
+  document.getElementById('studyProgress').textContent =
+    `${studyIndex + 1} / ${studyItems.length}  ·  ${studyScore} correct`;
+}
+
+function nextItem() {
+  if (studyIndex === studyItems.length - 1) {
+    finishStudy();
+    return;
+  }
+  studyIndex++;
+  renderItem();
+}
+
+function prevItem() {
+  if (studyIndex === 0) return;
+  studyIndex--;
+  renderItem();
+}
+
+function finishStudy() {
+  const total = studyItems.length;
+  document.getElementById('studyProgress').textContent = '';
+  document.getElementById('resultTitle').textContent =
+    studyMode === 'quiz' ? 'Quiz complete' : 'Deck complete';
+
+  if (studyMode === 'quiz') {
+    const pct = Math.round((studyScore / total) * 100);
+    document.getElementById('resultScore').textContent = `${studyScore} / ${total}`;
+    document.getElementById('resultNote').textContent = `${pct}% correct.`;
+  } else {
+    document.getElementById('resultScore').textContent = total;
+    document.getElementById('resultNote').textContent =
+      `${total === 1 ? 'card' : 'cards'} reviewed.`;
+  }
+
+  showStudyPanel('studyResults');
+}
+
 initializeEntries();
 </script>
 
@@ -1437,25 +2085,39 @@ async function loadEntriesFromFirestore() {
   }
 }
 
-// Toggle favorite status
+// Single place that changes favourite state, so the card star and the
+// modal star can never disagree.
+function setFavorite(card, value) {
+  card.dataset.favorite = value ? 'true' : 'false';
+  
+  const star = card.querySelector('.card-star');
+  if (star) {
+    star.textContent = value ? '★' : '☆';
+    star.classList.toggle('favorite', value);
+  }
+  
+  // Mirror it in the detail modal if this card is the one open
+  if (card === currentCard) {
+    const detailStar = document.getElementById('detailStar');
+    detailStar.textContent = value ? '★' : '☆';
+    detailStar.classList.toggle('favorite', value);
+  }
+  
+  saveToFirestore(card);
+  
+  // If the list is filtered to favourites, un-starring should drop the card
+  if (favoriteFilter === 'favorites') filterCards();
+}
+
 function toggleFavorite(e) {
   e.stopPropagation(); // Don't trigger card detail view
   const card = e.currentTarget.closest('.card');
-  const isFavorite = card.dataset.favorite === 'true';
-  const star = card.querySelector('.card-star');
-  
-  // Toggle status
-  card.dataset.favorite = !isFavorite ? 'true' : 'false';
-  star.textContent = !isFavorite ? '★' : '☆';
-  
-  if (!isFavorite) {
-    star.classList.add('favorite');
-  } else {
-    star.classList.remove('favorite');
-  }
-  
-  // Save to Firestore
-  saveToFirestore(card);
+  setFavorite(card, card.dataset.favorite !== 'true');
+}
+
+function toggleFavoriteFromDetail() {
+  if (!currentCard) return;
+  setFavorite(currentCard, currentCard.dataset.favorite !== 'true');
 }
 
 // Save entry to Firestore
