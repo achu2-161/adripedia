@@ -911,6 +911,13 @@ function closeDetail() {
 function deleteEntry() {
   if (confirm('Delete this entry?')) {
     if (currentCard) {
+      const term = currentCard.dataset.term;
+      const owner = currentCard.dataset.owner;
+      
+      // Delete from Firestore first
+      deleteFromFirestore(term, owner);
+      
+      // Then remove from DOM
       currentCard.remove();
       closeDetail();
       filterCards();
