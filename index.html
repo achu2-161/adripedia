@@ -1580,16 +1580,61 @@ function closeForm() {
   area.innerHTML = '<div class="upload-label">📷 Tap to upload</div>';
 }
 
-function previewImage(input) {
-  if (input.files[0]) {
+// Firestore caps a document at 1 MiB, and base64 inflates a file by ~33%,
+// so raw phone photos never fit. Downscale to a sensible max dimension and
+// re-encode as JPEG before storing — a screenshot typically lands at 60–150 KB.
+const IMAGE_MAX_DIM = 1000;
+const IMAGE_QUALITY = 0.72;
+
+function compressImage(file) {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
-      const area = document.querySelector('#createModal .upload-area');
-      area.classList.add('has-image');
-      area.innerHTML = `<img class="upload-thumb" src="${e.target.result}">`;
+    reader.onerror = () => reject(new Error('Could not read that file'));
+    reader.onload = e => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Could not read that image'));
+      img.onload = () => {
+        let { width, height } = img;
+        const scale = Math.min(1, IMAGE_MAX_DIM / Math.max(width, height));
+        width = Math.round(width * scale);
+        height = Math.round(height * scale);
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        // JPEG has no alpha, so flatten onto white rather than black
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+
+        resolve(canvas.toDataURL('image/jpeg', IMAGE_QUALITY));
+      };
+      img.src = e.target.result;
     };
-    reader.readAsDataURL(input.files[0]);
-  }
+    reader.readAsDataURL(file);
+  });
+}
+
+function previewImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const area = document.querySelector('#createModal .upload-area');
+  area.innerHTML = '<div class="upload-label">Processing…</div>';
+
+  compressImage(file)
+    .then(dataUrl => {
+      area.classList.add('has-image');
+      area.innerHTML = `<img class="upload-thumb" src="${dataUrl}">`;
+      const kb = Math.round(dataUrl.length * 0.75 / 1024);
+      console.log(`Image compressed to ~${kb} KB`);
+    })
+    .catch(err => {
+      area.classList.remove('has-image');
+      area.innerHTML = '<div class="upload-label">📷 Tap to upload</div>';
+      alert(err.message);
+    });
 }
 
 
@@ -2165,7 +2210,7 @@ initializeEntries();
 <script>
 // ⚠️ IMPORTANT: Replace with your actual Firebase config from console.firebase.google.com
 const firebaseConfig = {
-  apiKey: "AIzaSyC mQ8PmBoZjptkn xmmtXAYKUIdJ2-Daf80",
+  apiKey: "AIzaSyCmQ8PmBoZjptknxmmtXAYKUIdJ2-Daf80",
   authDomain: "adripedia-app.firebaseapp.com",
   projectId: "adripedia-app",
   storageBucket: "adripedia-app.appspot.com",
@@ -2240,8 +2285,9 @@ function toggleFavoriteFromDetail() {
 
 // Save entry to Firestore
 async function saveToFirestore(card) {
+  let entryData = null;
   try {
-    const entryData = {
+    entryData = {
       term: card.dataset.term,
       def: card.querySelector('.card-def').textContent,
       owner: card.dataset.owner,
@@ -2260,6 +2306,12 @@ async function saveToFirestore(card) {
     console.log('Saved to Firestore:', entryData.term);
   } catch (error) {
     console.error('Firestore save error:', error);
+    // A failed write leaves the card on screen looking saved, so say so out
+    // loud. Oversized images are the usual cause (1 MiB per document).
+    const tooBig = JSON.stringify(entryData || {}).length > 1000000;
+    alert(tooBig
+      ? `"${card.dataset.term}" is too large to sync — the image exceeds Firestore's 1 MB limit. Try a smaller screenshot.`
+      : `"${card.dataset.term}" didn't sync to the cloud. It's saved on this device only. Check your connection and edit it again to retry.`);
   }
 }
 
