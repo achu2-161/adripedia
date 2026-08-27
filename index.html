@@ -203,12 +203,33 @@
       touch-action: manipulation;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
       transition: all 0.2s ease;
+      position: relative;
     }
     
     .card:active {
       background: #fafbfc;
       box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
       transform: translateY(-1px);
+    }
+    
+    .card-star {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      font-size: 20px;
+      cursor: pointer;
+      user-select: none;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+    
+    .card-star:hover {
+      opacity: 1;
+    }
+    
+    .card-star.favorite {
+      opacity: 1;
+      color: #fbbf24;
     }
     
     .card-term {
@@ -242,6 +263,13 @@
       border-radius: 12px;
       font-weight: 500;
       letter-spacing: 0.2px;
+    }
+    
+    .card-date {
+      font-size: 11px;
+      color: #9aa0a6;
+      font-family: sans-serif;
+      margin-top: 8px;
     }
     
     .empty-state {
@@ -623,6 +651,10 @@
         <option value="date">Newest</option>
         <option value="alpha">A–Z</option>
       </select>
+      <select class="sort-select" onchange="setFavoriteFilter(this.value)" style="margin-left: 8px;">
+        <option value="all">All</option>
+        <option value="favorites">★ Favorites</option>
+      </select>
     </div>
   </div>
 
@@ -708,6 +740,7 @@
 
 <script>
 let sortOrder = 'date';
+let favoriteFilter = 'all';
 let currentCard = null;
 let entries = [];
 let currentEncyclopedia = 'adrian'; // 'adrian' or 'yixiao'
@@ -732,6 +765,11 @@ function setSortOrder(order) {
   filterCards();
 }
 
+function setFavoriteFilter(filter) {
+  favoriteFilter = filter;
+  filterCards();
+}
+
 function filterCards() {
   const search = document.getElementById('search').value.toLowerCase();
   const cards = Array.from(document.querySelectorAll('.card'));
@@ -740,14 +778,22 @@ function filterCards() {
     const term = card.dataset.term.toLowerCase();
     const owner = card.dataset.owner;
     const text = card.textContent.toLowerCase();
+    const isFavorite = card.dataset.favorite === 'true';
     
-    // Show based on current view
+    // Check search and ownership
+    let matches = true;
     if (currentEncyclopedia === 'all') {
-      return term.includes(search) || text.includes(search);
+      matches = term.includes(search) || text.includes(search);
     } else {
-      return (term.includes(search) || text.includes(search)) && 
-             owner === currentEncyclopedia;
+      matches = (term.includes(search) || text.includes(search)) && 
+                owner === currentEncyclopedia;
     }
+    
+    // Check favorite filter
+    if (favoriteFilter === 'favorites') {
+      return matches && isFavorite;
+    }
+    return matches;
   });
 
   if (sortOrder === 'alpha') {
@@ -902,6 +948,12 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const date = new Date(dateStr + 'T00:00:00');
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
 function openMenu() {
   document.getElementById('menu').classList.add('active');
   document.body.classList.add('modal-open');
@@ -966,10 +1018,19 @@ function handleSave(e) {
     }
     
     currentCard.innerHTML = `
+      <div class="card-star" onclick="toggleFavorite(event)">☆</div>
       <div class="card-term">${escapeHtml(term)}</div>
       <div class="card-def">${escapeHtml(def)}</div>
       <div class="card-owner" style="display: none;">${owner === 'adrian' ? 'Adrian' : 'Yixiao'}</div>
+      <div class="card-date">Added: ${formatDate(currentCard.dataset.date)}</div>
     `;
+    // Restore favorite status
+    const isFavorite = currentCard.dataset.favorite === 'true';
+    const star = currentCard.querySelector('.card-star');
+    if (isFavorite) {
+      star.textContent = '★';
+      star.classList.add('favorite');
+    }
     currentCard.onclick = function() { showDetail(this); };
     
     document.getElementById('term').dataset.editing = 'false';
@@ -992,10 +1053,13 @@ function handleSave(e) {
     }
     
     card.innerHTML = `
+      <div class="card-star" onclick="toggleFavorite(event)">☆</div>
       <div class="card-term">${escapeHtml(term)}</div>
       <div class="card-def">${escapeHtml(def)}</div>
       <div class="card-owner" style="display: none;">${owner === 'adrian' ? 'Adrian' : 'Yixiao'}</div>
+      <div class="card-date">Added: ${formatDate(card.dataset.date)}</div>
     `;
+    card.dataset.favorite = 'false';
     card.onclick = function() { showDetail(this); };
     
     document.getElementById('cardsList').prepend(card);
@@ -1018,7 +1082,8 @@ function backupData() {
     owner: card.dataset.owner,
     date: card.dataset.date,
     link: card.dataset.link || '',
-    image: card.dataset.image || ''
+    image: card.dataset.image || '',
+    favorite: card.dataset.favorite === 'true'
   }));
   
   const jsonString = JSON.stringify(backup, null, 2);
@@ -1062,17 +1127,29 @@ function restoreData() {
             card.dataset.term = entry.term;
             card.dataset.owner = entry.owner;
             card.dataset.date = entry.date || new Date().toISOString().split('T')[0];
+            card.dataset.favorite = entry.favorite ? 'true' : 'false';
             if (entry.link) card.dataset.link = entry.link;
             if (entry.image) card.dataset.image = entry.image;
             
             card.innerHTML = `
+              <div class="card-star" onclick="toggleFavorite(event)">${entry.favorite ? '★' : '☆'}</div>
               <div class="card-term">${escapeHtml(entry.term)}</div>
               <div class="card-def">${escapeHtml(entry.def)}</div>
               <div class="card-owner" style="display: none;">${entry.owner === 'adrian' ? 'Adrian' : 'Yixiao'}</div>
+              <div class="card-date">Added: ${formatDate(card.dataset.date)}</div>
             `;
+            
+            // Add favorite class to star if needed
+            if (entry.favorite) {
+              card.querySelector('.card-star').classList.add('favorite');
+            }
+            
             card.onclick = function() { showDetail(this); };
             
             document.getElementById('cardsList').appendChild(card);
+            
+            // Save to Firestore
+            saveToFirestore(card);
           });
           
           filterCards();
@@ -1138,6 +1215,27 @@ async function loadEntriesFromFirestore() {
   }
 }
 
+// Toggle favorite status
+function toggleFavorite(e) {
+  e.stopPropagation(); // Don't trigger card detail view
+  const card = e.currentTarget.closest('.card');
+  const isFavorite = card.dataset.favorite === 'true';
+  const star = card.querySelector('.card-star');
+  
+  // Toggle status
+  card.dataset.favorite = !isFavorite ? 'true' : 'false';
+  star.textContent = !isFavorite ? '★' : '☆';
+  
+  if (!isFavorite) {
+    star.classList.add('favorite');
+  } else {
+    star.classList.remove('favorite');
+  }
+  
+  // Save to Firestore
+  saveToFirestore(card);
+}
+
 // Save entry to Firestore
 async function saveToFirestore(card) {
   try {
@@ -1148,6 +1246,7 @@ async function saveToFirestore(card) {
       date: card.dataset.date,
       link: card.dataset.link || '',
       image: card.dataset.image || '',
+      favorite: card.dataset.favorite === 'true',
       updatedAt: new Date().toISOString()
     };
     
@@ -1201,10 +1300,17 @@ function updateLocalCard(entry) {
     if (entry.image) card.dataset.image = entry.image;
     
     card.innerHTML = `
+      <div class="card-star" onclick="toggleFavorite(event)">☆</div>
       <div class="card-term">${escapeHtml(entry.term)}</div>
       <div class="card-def">${escapeHtml(entry.def)}</div>
       <div class="card-owner" style="display: none;">${entry.owner === 'adrian' ? 'Adrian' : 'Yixiao'}</div>
+      <div class="card-date">Added: ${formatDate(entry.date)}</div>
     `;
+    card.dataset.favorite = entry.favorite ? 'true' : 'false';
+    if (entry.favorite) {
+      card.querySelector('.card-star').textContent = '★';
+      card.querySelector('.card-star').classList.add('favorite');
+    }
     card.onclick = function() { showDetail(this); };
     
     document.getElementById('cardsList').prepend(card);
