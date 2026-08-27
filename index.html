@@ -996,6 +996,9 @@ function handleSave(e) {
     
     document.getElementById('term').dataset.editing = 'false';
     document.getElementById('term').dataset.originalTerm = '';
+    
+    // Save edited entry to Firestore
+    saveToFirestore(currentCard);
   } else {
     const card = document.createElement('div');
     card.className = 'card';
@@ -1018,6 +1021,9 @@ function handleSave(e) {
     card.onclick = function() { showDetail(this); };
     
     document.getElementById('cardsList').prepend(card);
+    
+    // Save new entry to Firestore
+    saveToFirestore(card);
   }
   
   closeForm();
