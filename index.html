@@ -220,6 +220,15 @@
       background: #f1f3f4;
     }
     
+    .sort-option:focus {
+      outline: none;
+    }
+    
+    .sort-option:focus-visible {
+      outline: 2px solid #2563eb;
+      outline-offset: -2px;
+    }
+    
     .sort-option.checked {
       background: #e8eaed;
     }
@@ -940,12 +949,13 @@ function updateSortButton() {
   document.getElementById('dirAscLabel').textContent =
     sortField === 'alpha' ? 'A to Z' : 'Old to new';
   
-  // Move the ticks
-  document.querySelectorAll('#sortMenu .sort-option').forEach(opt => {
-    const isActive =
-      (opt.dataset.field && opt.dataset.field === sortField) ||
-      (opt.dataset.dir && opt.dataset.dir === sortDir);
-    opt.classList.toggle('checked', isActive);
+  // Move the ticks — each group evaluated separately, with real booleans.
+  // (classList.toggle ignores a non-boolean second argument and flips instead.)
+  document.querySelectorAll('#sortMenu .sort-option[data-field]').forEach(opt => {
+    opt.classList.toggle('checked', opt.dataset.field === sortField);
+  });
+  document.querySelectorAll('#sortMenu .sort-option[data-dir]').forEach(opt => {
+    opt.classList.toggle('checked', opt.dataset.dir === sortDir);
   });
 }
 
